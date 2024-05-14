@@ -118,7 +118,7 @@ extern "C" consvar_t cv_lua_profile, cv_menuframeskip;
 #define ASSET_HASH_MAPS_PK3						"a8bd1f924531c483f500d96583b7b837"
 #define ASSET_HASH_UNLOCKS_PK3					"ebc06ff46c2cc80e93dadf5f7099d7b8"
 #define ASSET_HASH_STAFFGHOSTS_PK3				"9cb77f6c0e801c1bc61ca84870b65707"
-#define ASSET_HASH_SHADERS_PK3					"dbfb1d5eb9818cd2fb81680c0bab05c0"
+#define ASSET_HASH_SHADERS_PK3					"3078b424ad673544ccf684ca89eb7bd1"
 #ifdef USE_PATCH_FILE
 #define ASSET_HASH_PATCH_PK3					"00000000000000000000000000000000"
 #endif
@@ -857,15 +857,19 @@ void D_SRB2Loop(void)
 		server = true;
 
 	// Pushing of + parameters is now done back in D_SRB2Main, not here.
+	CONS_Printf("I_UpdateTime\n");
 
 	I_UpdateTime();
+	CONS_Printf("I_GetTime\n");
 	oldentertics = I_GetTime();
 
 	// end of loading screen: CONS_Printf() will no more call FinishUpdate()
 	con_startup = false;
 
 	// make sure to do a d_display to init mode _before_ load a level
+	CONS_Printf("SCR_SetMode\n");
 	SCR_SetMode(); // change video mode
+	CONS_Printf("SCR_Recalc\n");
 	SCR_Recalc();
 
 	chosenrendermode = render_none;
