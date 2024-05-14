@@ -83,10 +83,14 @@ void I_UpdateTime(void)
 	enterprecise = I_GetPreciseTime();
 	elapsedseconds = (double)(enterprecise - oldenterprecise) / I_GetPrecisePrecision();
 	tictimer += elapsedseconds;
+	if (tictimer > 30)
+		tictimer = 0;
 	while (tictimer > 1.0/ticratescaled)
 	{
 		entertic += 1;
 		tictimer -= 1.0/ticratescaled;
+		if (entertic > 10)
+			break;
 	}
 	realtics = entertic - oldentertics;
 	oldentertics = entertic;
