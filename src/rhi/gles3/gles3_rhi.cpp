@@ -30,7 +30,7 @@ using namespace rhi;
 #define GL_ASSERT                                                                                                      \
 	while (1)                                                                                                          \
 	{                                                                                                                  \
-		GLenum __err = gl_->GetError();                                                                                \
+		GLenum __err = glGetError();                                                                                \
 		if (__err != GL_NO_ERROR)                                                                                      \
 		{                                                                                                              \
 			I_Error("GL Error at %s %d: %d", __FILE__, __LINE__, __err);                                               \
@@ -76,12 +76,12 @@ constexpr std::tuple<GLenum, GLenum, GLuint> map_pixel_data_format(rhi::PixelFor
 	switch (format)
 	{
 	case rhi::PixelFormat::kR8:
-		layout = GL_RED;
+		layout = GL_LUMINANCE;
 		type = GL_UNSIGNED_BYTE;
 		size = 1;
 		break;
 	case rhi::PixelFormat::kRG8:
-		layout = GL_RG;
+		layout = GL_LUMINANCE_ALPHA;
 		type = GL_UNSIGNED_BYTE;
 		size = 2;
 		break;
@@ -110,9 +110,9 @@ constexpr GLenum map_texture_format(rhi::TextureFormat format)
 	case rhi::TextureFormat::kRGB:
 		return GL_RGB;
 	case rhi::TextureFormat::kLuminance:
-		return GL_RED;
+		return GL_LUMINANCE;
 	case rhi::TextureFormat::kLuminanceAlpha:
-		return GL_RG;
+		return GL_LUMINANCE_ALPHA;
 	default:
 		return GL_ZERO;
 	}
@@ -155,9 +155,9 @@ constexpr GLenum map_internal_texture_format(rhi::TextureFormat format)
 	case rhi::TextureFormat::kRGB:
 		return GL_RGB8;
 	case rhi::TextureFormat::kLuminance:
-		return GL_RED;
+		return GL_LUMINANCE;
 	case rhi::TextureFormat::kLuminanceAlpha:
-		return GL_RG;
+		return GL_LUMINANCE_ALPHA;
 	default:
 		return GL_ZERO;
 	}
@@ -654,18 +654,12 @@ void Gl2Rhi::update_texture(
 
 	// Each row of pixels must be on the unpack alignment boundary.
 	// This alignment is not user changeable until OpenGL 4.
-	constexpr const int32_t kUnpackAlignment = 4;
 
-	GLenum format = GL_RGBA;
+	GLenum format = map_texture_format(t.desc.format);
 	GLenum type = GL_UNSIGNED_BYTE;
 	GLuint size = 0;
 	std::tie(format, type, size) = map_pixel_data_format(data_format);
 	SRB2_ASSERT(format != GL_ZERO && type != GL_ZERO);
-	SRB2_ASSERT(map_texture_format(t.desc.format) == format);
-
-	int32_t expected_row_span = (((size * region.w) + kUnpackAlignment - 1) / kUnpackAlignment) * kUnpackAlignment;
-	SRB2_ASSERT(expected_row_span * region.h == data.size_bytes());
-	SRB2_ASSERT(region.x + region.w <= t.desc.width && region.y + region.h <= t.desc.height);
 
 	glActiveTexture(GL_TEXTURE0);
 	GL_ASSERT;
